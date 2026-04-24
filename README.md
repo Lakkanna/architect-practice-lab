@@ -8,6 +8,8 @@ No installation, no server, no data collection. Open the page and start practici
 
 ---
 
+![Architect Practice Lab](./assets/cover.svg)
+
 ## What's inside
 
 **291 questions** across nine sections, covering every task statement in the official exam guide:

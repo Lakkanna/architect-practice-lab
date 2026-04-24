@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 627" width="1200" height="627">
+  <defs>
+    <radialGradient id="amberGlow" cx="18%" cy="12%" r="55%">
+      <stop offset="0%" stop-color="#e89b3c" stop-opacity="0.12"/>
+      <stop offset="60%" stop-color="#e89b3c" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="violetGlow" cx="85%" cy="88%" r="50%">
+      <stop offset="0%" stop-color="#a78bc7" stop-opacity="0.08"/>
+      <stop offset="60%" stop-color="#a78bc7" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="grain">
+      <feTurbulence baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.06 0"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="627" fill="#14110f"/>
+  <rect width="1200" height="627" fill="url(#amberGlow)"/>
+  <rect width="1200" height="627" fill="url(#violetGlow)"/>
+  <rect width="1200" height="627" filter="url(#grain)" opacity="0.5"/>
+
+  <text x="72" y="80" font-family="'JetBrains Mono', 'Courier New', monospace" font-size="13" fill="#7b7367" letter-spacing="4">
+    PRACTICE FIELD MANUAL · VOL. 1
+  </text>
+
+  <line x1="72" y1="100" x2="170" y2="100" stroke="#3d342d" stroke-width="1"/>
+
+  <text x="72" y="200" font-family="'Fraunces', Georgia, serif" font-size="74" font-weight="300" fill="#f4ede3" letter-spacing="-1">
+    Claude Certified
+  </text>
+
+  <text x="72" y="280" font-family="'Fraunces', Georgia, serif" font-size="74" font-weight="300" fill="#f4ede3" letter-spacing="-1">
+    Architect
+  </text>
+
+  <text x="72" y="370" font-family="'Fraunces', Georgia, serif" font-size="82" font-style="italic" font-weight="400" fill="#e89b3c" letter-spacing="-1">
+    Foundations
+  </text>
+
+  <line x1="72" y1="410" x2="1128" y2="410" stroke="#3d342d" stroke-width="1"/>
+
+  <text x="72" y="460" font-family="'Fraunces', Georgia, serif" font-size="24" font-style="italic" fill="#c9c0b2">
+    A study companion built to mimic the real thing.
+  </text>
+
+  <g font-family="'JetBrains Mono', 'Courier New', monospace" font-size="13" letter-spacing="2">
+    <text x="72" y="530" fill="#7b7367">QUESTIONS</text>
+    <text x="72" y="570" font-family="'Fraunces', Georgia, serif" font-size="38" font-weight="400" fill="#f4ede3" letter-spacing="-1">291</text>
+
+    <text x="260" y="530" fill="#7b7367">SECTIONS</text>
+    <text x="260" y="570" font-family="'Fraunces', Georgia, serif" font-size="38" font-weight="400" fill="#f4ede3" letter-spacing="-1">9</text>
+
+    <text x="380" y="530" fill="#7b7367">DOMAINS</text>
+    <text x="380" y="570" font-family="'Fraunces', Georgia, serif" font-size="38" font-weight="400" fill="#f4ede3" letter-spacing="-1">5</text>
+
+    <text x="500" y="530" fill="#7b7367">PASS MARK</text>
+    <text x="500" y="570" font-family="'Fraunces', Georgia, serif" font-size="38" font-weight="400" fill="#f4ede3" letter-spacing="-1">720<tspan font-family="'JetBrains Mono', monospace" font-size="15" fill="#7b7367" letter-spacing="1">  /1000</tspan></text>
+  </g>
+
+  <g font-family="'JetBrains Mono', 'Courier New', monospace" font-size="13" fill="#7b7367" letter-spacing="1">
+    <text x="1128" y="530" text-anchor="end">
+      <tspan fill="#7b7367">OPEN SOURCE · MIT · NO SIGN-UP</tspan>
+    </text>
+    <text x="1128" y="570" text-anchor="end">
+      <tspan fill="#e89b3c">lakkanna.github.io/architect-practice-lab</tspan>
+    </text>
+  </g>
+</svg>
