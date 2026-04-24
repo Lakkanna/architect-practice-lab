@@ -672,6 +672,89 @@
   }
   .banner.show { display: block; }
 
+  /* === Anti-patterns cheatsheet === */
+  .ap-group {
+    margin-bottom: 32px;
+  }
+  .ap-domain {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--amber);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .ap-item {
+    padding: 12px 0;
+    border-bottom: 1px dotted var(--rule);
+  }
+  .ap-item:last-child { border-bottom: none; }
+  .ap-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 4px;
+  }
+  .ap-wrong {
+    font-family: var(--serif);
+    font-size: 15.5px;
+    color: var(--red);
+    line-height: 1.4;
+    flex: 1;
+  }
+  .ap-right {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--green);
+    line-height: 1.5;
+    padding-left: 16px;
+    margin-top: 2px;
+  }
+  .ap-sev {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    padding: 3px 8px;
+    border: 1px solid;
+    font-weight: 500;
+    flex-shrink: 0;
+    line-height: 1.4;
+  }
+  .ap-sev.ap-crit { color: var(--red); border-color: var(--red); }
+  .ap-sev.ap-high { color: var(--amber); border-color: var(--amber); }
+  .ap-sev.ap-med  { color: var(--paper-dim); border-color: var(--paper-dim); }
+  .ap-tally {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--paper-faint);
+  }
+  .ap-tally strong {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 400;
+    margin-right: 8px;
+    display: inline-block;
+    vertical-align: middle;
+    letter-spacing: -0.01em;
+  }
+
+  @media (max-width: 820px) {
+    .ap-row { flex-direction: column; gap: 8px; }
+    .ap-tally { gap: 20px; flex-wrap: wrap; }
+  }
+
   /* === Footer === */
   footer {
     margin-top: 80px;
@@ -767,17 +850,181 @@
     </div>
 
     <div class="panel">
-      <span class="panel-num">§ 02 — Begin</span>
+      <span class="panel-num">§ 02 — Anti-Patterns Cheatsheet</span>
+      <p class="lede" style="font-size: 17px; margin-bottom: 28px;">
+        The 18 most common wrong answers you'll encounter on the exam — memorize these to eliminate
+        <em style="color: var(--amber);">2–3 options on sight</em> before even reading the correct answer.
+      </p>
+
+      <div class="ap-group">
+        <div class="ap-domain">Domain 1 · Agentic Architecture</div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Parsing natural language for loop termination</span>
+            <span class="ap-sev ap-crit">CRITICAL</span>
+          </div>
+          <div class="ap-right">✓ Check stop_reason field (tool_use vs end_turn)</div>
+        </div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Arbitrary iteration caps as primary stopping mechanism</span>
+            <span class="ap-sev ap-crit">CRITICAL</span>
+          </div>
+          <div class="ap-right">✓ Let the agentic loop terminate naturally via stop_reason; keep iteration caps as a safety net only</div>
+        </div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Prompt-based enforcement for critical business rules</span>
+            <span class="ap-sev ap-crit">CRITICAL</span>
+          </div>
+          <div class="ap-right">✓ Use programmatic hooks (PreToolUse/PostToolUse) for deterministic enforcement</div>
+        </div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Sentiment-based escalation to human agents</span>
+            <span class="ap-sev ap-high">HIGH</span>
+          </div>
+          <div class="ap-right">✓ Escalate on policy gaps, capability limits, explicit requests, or business thresholds</div>
+        </div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Self-reported confidence scores for decision-making</span>
+            <span class="ap-sev ap-high">HIGH</span>
+          </div>
+          <div class="ap-right">✓ Use structured criteria and programmatic checks based on observable facts</div>
+        </div>
+      </div>
+
+      <div class="ap-group">
+        <div class="ap-domain">Domain 2 · Tool Design & MCP</div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Generic error messages ("Operation failed")</span>
+            <span class="ap-sev ap-crit">CRITICAL</span>
+          </div>
+          <div class="ap-right">✓ Return structured errors: isError, errorCategory, isRetryable, and context</div>
+        </div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Silently returning empty results for access failures</span>
+            <span class="ap-sev ap-crit">CRITICAL</span>
+          </div>
+          <div class="ap-right">✓ Distinguish access failures (isError: true) from genuinely empty results</div>
+        </div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Giving one agent 18+ tools</span>
+            <span class="ap-sev ap-high">HIGH</span>
+          </div>
+          <div class="ap-right">✓ Keep 4-5 tools per agent; distribute the rest across specialized subagents</div>
+        </div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Hardcoding API keys in .mcp.json configuration</span>
+            <span class="ap-sev ap-crit">CRITICAL</span>
+          </div>
+          <div class="ap-right">✓ Use ${ENV_VAR} environment variable expansion in MCP config</div>
+        </div>
+      </div>
+
+      <div class="ap-group">
+        <div class="ap-domain">Domain 3 · Claude Code Configuration</div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Putting personal preferences in project-level CLAUDE.md</span>
+            <span class="ap-sev ap-med">MEDIUM</span>
+          </div>
+          <div class="ap-right">✓ ~/.claude/CLAUDE.md for personal prefs; .claude/CLAUDE.md for team standards</div>
+        </div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Using commands for complex tasks that need context isolation</span>
+            <span class="ap-sev ap-high">HIGH</span>
+          </div>
+          <div class="ap-right">✓ Use skills with context: fork and allowed-tools restrictions</div>
+        </div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Same-session self-review in CI/CD pipelines</span>
+            <span class="ap-sev ap-crit">CRITICAL</span>
+          </div>
+          <div class="ap-right">✓ Use separate sessions for code generation and code review</div>
+        </div>
+      </div>
+
+      <div class="ap-group">
+        <div class="ap-domain">Domain 4 · Prompt Engineering</div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Vague instructions like "be thorough" or "find all issues"</span>
+            <span class="ap-sev ap-crit">CRITICAL</span>
+          </div>
+          <div class="ap-right">✓ Provide explicit, measurable criteria (e.g., "flag functions exceeding 50 lines")</div>
+        </div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Assuming tool_use guarantees semantic correctness</span>
+            <span class="ap-sev ap-high">HIGH</span>
+          </div>
+          <div class="ap-right">✓ tool_use guarantees STRUCTURE only — validate values with business-rule checks</div>
+        </div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Generic retry messages ("There were errors, please try again")</span>
+            <span class="ap-sev ap-high">HIGH</span>
+          </div>
+          <div class="ap-right">✓ Append specific error details: which field, what was wrong, expected vs actual</div>
+        </div>
+      </div>
+
+      <div class="ap-group">
+        <div class="ap-domain">Domain 5 · Context & Reliability</div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Progressive summarization of critical customer details</span>
+            <span class="ap-sev ap-crit">CRITICAL</span>
+          </div>
+          <div class="ap-right">✓ Use immutable "case facts" blocks positioned at the start of context</div>
+        </div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ Aggregate accuracy metrics only (e.g., "95% overall")</span>
+            <span class="ap-sev ap-crit">CRITICAL</span>
+          </div>
+          <div class="ap-right">✓ Track accuracy per document type (stratified metrics)</div>
+        </div>
+        <div class="ap-item">
+          <div class="ap-row">
+            <span class="ap-wrong">✗ No provenance tracking for multi-agent data</span>
+            <span class="ap-sev ap-high">HIGH</span>
+          </div>
+          <div class="ap-right">✓ Track source, confidence level, timestamp, and agent ID for all data</div>
+        </div>
+      </div>
+
+      <div class="ap-tally">
+        <span><strong style="color: var(--red);">10</strong> Critical</span>
+        <span><strong style="color: var(--amber);">7</strong> High</span>
+        <span><strong style="color: var(--paper-dim);">1</strong> Medium</span>
+        <span><strong style="color: var(--paper);">18</strong> Total</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <span class="panel-num">§ 03 — Begin</span>
       <div class="cta-row">
         <button class="btn" id="start-btn">Start New Practice Test</button>
         <button class="btn secondary" id="start-official-btn">Practice Official Questions</button>
         <button class="btn secondary" id="start-docs-btn">Docs Deep Dives</button>
+        <button class="btn secondary" id="start-antipatterns-btn">Anti-Pattern Spotter</button>
         <button class="btn secondary" id="reset-btn">Reset Question Pool</button>
       </div>
       <p class="note" style="margin-top: 24px;">
         <strong style="font-style: normal; color: var(--paper);">Practice Test</strong> draws four of the six exam scenarios at random, mirroring the real exam structure.
         <strong style="font-style: normal; color: var(--paper);">Official Questions</strong> runs through the canonical community practice set (sourced from claudecertifications.com), grouped by domain.
         <strong style="font-style: normal; color: var(--paper);">Docs Deep Dives</strong> tests the same exam concepts at higher precision, synthesized from platform.claude.com documentation.
+        <strong style="font-style: normal; color: var(--paper);">Anti-Pattern Spotter</strong> drills the 18 cheatsheet anti-patterns — one question per pattern to build instant recognition.
+        Scroll up to review the <strong style="font-style: normal; color: var(--paper);">Anti-Patterns Cheatsheet</strong> for a quick-reference of all 18 patterns before starting a test.
         Explanations appear immediately after each answer. The question pool persists for this browser session only — no data is stored.
       </p>
     </div>
@@ -3963,6 +4210,229 @@ SCENARIOS.push({
   ]
 });
 
+// ==========================================================================
+// SCENARIO 9: Anti-Pattern Spotter
+// One question per documented anti-pattern from the community cheatsheet
+// (claudecertifications.com/claude-certified-architect/anti-patterns).
+// Each question presents a plausible but wrong implementation and asks the
+// candidate to identify the correct pattern. Tagged by domain and severity.
+// ==========================================================================
+SCENARIOS.push({
+  id: 9,
+  title: "Anti-Pattern Spotter",
+  context: "This section drills the 18 documented anti-patterns most commonly seen as wrong answers on the exam. Each question presents a plausible-sounding but incorrect implementation and asks you to identify the correct pattern. Memorizing these lets you eliminate 2–3 distractors on sight during the real exam.",
+  questions: [
+
+    // ============ DOMAIN 1 — AGENTIC ARCHITECTURE (5 anti-patterns) ============
+    {
+      q: "[Anti-pattern · CRITICAL] An engineer writes an agentic loop that checks `if 'task complete' in response_text: break` to decide when to stop. Why is this wrong, and what should replace it?",
+      options: [
+        "Wrong: text content is for the user, not control flow — the model may phrase completion differently each time. Replace with checking the stop_reason field (continue on 'tool_use', terminate on 'end_turn').",
+        "Wrong: the comparison is case-sensitive. Fix by lowercasing both sides.",
+        "Wrong: 'task complete' is too specific. Broaden the phrase list to include 'done', 'finished', 'all set'.",
+        "Wrong: the loop should break on any text response. Simplify to `if response_text: break`."
+      ],
+      answer: 0,
+      explain: "Parsing natural language for loop termination is a critical anti-pattern. stop_reason is a structured, deterministic field that reliably signals continuation vs termination. Casing, broader phrase lists, and any-text checks all remain fundamentally probabilistic and fragile. Domain 1 · Agentic Architecture."
+    },
+    {
+      q: "[Anti-pattern · CRITICAL] A team caps their agent at 10 iterations as the primary stopping mechanism. What's the problem, and what's the correct approach?",
+      options: [
+        "Iteration caps may cut off the agent mid-task or allow pointless looping — they don't reflect task completion. Let the loop terminate naturally via stop_reason; keep any iteration cap only as a safety net, not the primary control.",
+        "10 is too low — raise the cap to 50 so complex tasks finish.",
+        "10 is too high — lower the cap to 3 for faster responses.",
+        "Iteration caps are fine; add a second cap on total tokens for extra safety."
+      ],
+      answer: 0,
+      explain: "Arbitrary iteration caps as the primary stopping mechanism is a critical anti-pattern. The model decides when it's done based on task state via stop_reason, not an arbitrary number. Iteration caps are acceptable as safety nets but never as the primary control. Raising/lowering the cap doesn't address the root cause. Domain 1 · Agentic Architecture."
+    },
+    {
+      q: "[Anti-pattern · CRITICAL] A manager asks the team to enforce a '$500 refund limit' by adding 'NEVER process refunds above $500' in all-caps to the system prompt. Why is this insufficient for critical business rules?",
+      options: [
+        "Prompts are probabilistic — the model CAN and WILL sometimes ignore critical instructions. Use programmatic hooks (PreToolUse/PostToolUse) for deterministic enforcement; hooks run as code, not suggestions, and provide 100% reliable enforcement.",
+        "All-caps triggers refusal heuristics. Rewrite in title case.",
+        "The rule is too specific. Broaden to 'process only reasonable refunds' for flexibility.",
+        "Put the rule in the user's message instead of the system prompt so Claude reads it last."
+      ],
+      answer: 0,
+      explain: "Prompt-based enforcement for critical business rules is a critical anti-pattern. Hooks intercept tool calls deterministically before execution — the model physically can't bypass them. Typography, vagueness, or message placement all remain within the probabilistic prompt domain. Domain 1 · Agentic Architecture."
+    },
+    {
+      q: "[Anti-pattern · HIGH] Your agent escalates to a human whenever sentiment analysis detects the user is frustrated. An angry customer asking to update their email is being routed to a human for a 10-second task. What's the right escalation criteria?",
+      options: [
+        "Sentiment does not equal task complexity. Escalate based on policy gaps, capability limits, explicit customer requests for a human, or business thresholds — objective criteria prevent unnecessary escalations while catching genuine edge cases.",
+        "Only escalate if the anger score exceeds 0.9 instead of 0.7.",
+        "Escalate on sentiment AND profanity — the combination is more reliable.",
+        "Always escalate frustrated customers; time costs are less than reputation costs."
+      ],
+      answer: 0,
+      explain: "Sentiment-based escalation is a high-priority anti-pattern. Tuning thresholds, compounding sentiment signals, or always-escalating all keep the fundamental misalignment — emotion ≠ complexity. Objective criteria (policy gaps, capability limits, explicit asks, thresholds) are the correct basis. Domain 1 · Agentic Architecture."
+    },
+    {
+      q: "[Anti-pattern · HIGH] A team adds a step where the model self-reports a confidence score (1-10) and auto-escalates anything below 7. Why is this unreliable for production decisions?",
+      options: [
+        "Model self-reported confidence scores are not well-calibrated — a confidently wrong model returns high scores on mistakes, and a cautious model returns low scores on correct answers. Use structured criteria and programmatic checks based on observable facts for escalation instead.",
+        "The threshold of 7 is arbitrary — use 5 instead for better distribution.",
+        "Self-reported confidence is reliable; the problem is asking on a 1-10 scale. Switch to 0.0-1.0.",
+        "Ask the model to explain its confidence before giving the score to improve calibration."
+      ],
+      answer: 0,
+      explain: "Self-reported confidence scores for decision-making is a high-priority anti-pattern. Calibration, not scale or threshold, is the core issue. Programmatic checks on observable facts are reliable and auditable. Asking for explanations doesn't fix miscalibration. Domain 1 · Agentic Architecture."
+    },
+
+    // ============ DOMAIN 2 — TOOL DESIGN & MCP (4 anti-patterns) ============
+    {
+      q: "[Anti-pattern · CRITICAL] An MCP tool returns `{ \"error\": \"Operation failed\" }` on all failures — transient, validation, permission, and business-rule. The agent retries all of them identically. What's the fix?",
+      options: [
+        "Return structured errors with isError, errorCategory (transient/validation/permission/business), isRetryable, and context. Structured errors give the agent enough information to make intelligent recovery decisions — retry transients, stop retrying business rejections, communicate the right reason to the user.",
+        "Add retry counts to the error message so the agent knows when to stop.",
+        "Always return HTTP 500 so the agent treats every failure consistently.",
+        "Return the full stack trace in every error for maximum debugging visibility."
+      ],
+      answer: 0,
+      explain: "Generic error messages is a critical anti-pattern. Retry counts in strings, uniform 500s, and raw stack traces all fail to expose the categorical information the agent needs to make recovery decisions. Domain 2 · Tool Design & MCP."
+    },
+    {
+      q: "[Anti-pattern · CRITICAL] An MCP tool returns `{ results: [] }` with isError: false both when a search legitimately finds nothing AND when the backend is unreachable. What goes catastrophically wrong, and what's the fix?",
+      options: [
+        "The agent thinks 'no results found' when the real problem is 'could not even check' — it proceeds with confidently wrong empty state. Distinguish access failures (isError: true) from genuinely empty results (isError: false, results: []) so the agent knows whether data is missing because it wasn't found vs. because the search failed.",
+        "Add a retry-with-backoff wrapper around every tool call so transient failures self-resolve.",
+        "Return null instead of [] for access failures so the agent can do a null-check.",
+        "Log access failures server-side and let the agent proceed with empty results."
+      ],
+      answer: 0,
+      explain: "Silently returning empty results for access failures is a critical anti-pattern. Blind retry can't tell when the backend is gone. null vs [] is a client-side convention without the isError signal. Server-side logging doesn't help the agent reason. Domain 2 · Tool Design & MCP."
+    },
+    {
+      q: "[Anti-pattern · HIGH] An agent has 18 tools and selection quality has degraded. A teammate suggests 'the descriptions just need more detail.' What's the better architectural fix?",
+      options: [
+        "Tool selection accuracy degrades rapidly above ~5 tools — similar tools create ambiguity that richer descriptions can't fully resolve. Keep 4-5 tools per agent and distribute the rest across specialized subagents, each with a focused toolset relevant to its role.",
+        "Write tool descriptions at 10+ sentences each to maximize disambiguation.",
+        "Force tool_choice: 'any' so the model commits to a choice faster.",
+        "Switch to a larger model; bigger models handle more tools naturally."
+      ],
+      answer: 0,
+      explain: "Giving one agent 18+ tools is a high-priority anti-pattern. Verbosity eventually produces diminishing returns and consumes token budget. Forced selection doesn't improve which tool is picked. Larger models help but don't solve decision complexity. Subagent distribution is the architectural fix. Domain 2 · Tool Design & MCP."
+    },
+    {
+      q: "[Anti-pattern · CRITICAL] A junior dev commits .mcp.json to git with `\"JIRA_TOKEN\": \"ATATT3xFfG...\"` hardcoded in a string field. What's wrong, and what's the right pattern?",
+      options: [
+        "Configuration files are committed to git — hardcoded secrets get leaked to anyone with repo access (including attackers if the repo leaks). Use ${ENV_VAR} environment variable expansion in MCP config so secrets stay in the developer's environment, not in version-controlled files.",
+        "Prefix the secret with 'secret_' to make scanners recognize and ignore it.",
+        "Commit with a short token expiry (1 hour) so leaks have limited damage.",
+        "Add the file to .gitignore and commit with a .mcp.json.example instead."
+      ],
+      answer: 0,
+      explain: "Hardcoding API keys in .mcp.json is a critical anti-pattern. Prefixes don't stop credential scanners from flagging — or attackers from using — the token. Short expiries still expose the token in history. .gitignore + example files defeat the point of sharing config. Env var expansion is the documented clean pattern. Domain 2 · Tool Design & MCP."
+    },
+
+    // ============ DOMAIN 3 — CLAUDE CODE CONFIG (3 anti-patterns) ============
+    {
+      q: "[Anti-pattern · MEDIUM] A developer adds their preferred editor theme and terminal color scheme to the project's .claude/CLAUDE.md so 'the whole team benefits.' What's wrong with this?",
+      options: [
+        "Personal preferences (editor settings, themes) should not be imposed on the whole team — different teammates have different setups. Use ~/.claude/CLAUDE.md for personal prefs and .claude/CLAUDE.md for team standards; each layer has a specific purpose and audience.",
+        "Themes and color schemes belong in environment variables, not CLAUDE.md at all.",
+        "The project CLAUDE.md is too crowded; move personal prefs to a .claude/prefs.md instead.",
+        "CLAUDE.md doesn't support preference metadata; use a JSON config file."
+      ],
+      answer: 0,
+      explain: "Putting personal preferences in project-level CLAUDE.md is a medium-severity anti-pattern — it imposes personal choices on teammates. User-scope vs project-scope have clear, documented purposes. Env vars and JSON configs don't address the scope confusion. Domain 3 · Claude Code Config."
+    },
+    {
+      q: "[Anti-pattern · HIGH] A team uses a /analyze-codebase slash command for expensive cross-repo exploration that produces verbose intermediate output. The main chat gets polluted with analysis noise. What's the right tool for this job?",
+      options: [
+        "Commands run in the current session context — they pollute it with exploration noise. Use a skill with context: fork and allowed-tools restrictions: forked context keeps exploration isolated from the main session, and tool restrictions prevent accidental side effects during analysis.",
+        "Keep the command but pipe its output through /compact immediately after.",
+        "Replace the command with a shell script invoked via Bash that writes to a file.",
+        "Split the command into 5 smaller commands to reduce each one's output."
+      ],
+      answer: 0,
+      explain: "Using commands for complex tasks that need context isolation is a high-priority anti-pattern. /compact after the fact doesn't prevent the initial pollution. Shell scripts lose the agent integration. Smaller commands still run in main context. Skills with context: fork are the documented primitive. Domain 3 · Claude Code Config."
+    },
+    {
+      q: "[Anti-pattern · CRITICAL] A CI/CD pipeline has Claude generate code, then asks the same session to review that code before merging. Reviews rarely find issues. Why, and what's the fix?",
+      options: [
+        "The reviewer retains the generator's reasoning context, creating confirmation bias — the same session that made the decision is unlikely to question it. Use separate sessions for code generation and code review so a fresh session evaluates the code objectively with no preconceptions.",
+        "Add a 'be critical' instruction to the review prompt to overcome the bias.",
+        "Raise temperature during the review phase so the model is less confident in its own work.",
+        "Insert a /compact step between generation and review to clear the shared context."
+      ],
+      answer: 0,
+      explain: "Same-session self-review in CI/CD is a critical anti-pattern. Prompt instructions to 'be critical' are probabilistic and don't undo the reasoning-context bias. Temperature doesn't change what's in the context. /compact compresses but doesn't remove the generator's perspective. Independent sessions are the fix. Domain 3 · Claude Code Config."
+    },
+
+    // ============ DOMAIN 4 — PROMPT ENGINEERING (3 anti-patterns) ============
+    {
+      q: "[Anti-pattern · CRITICAL] A code review bot prompt says 'be thorough and find all issues.' False positives are high and developers have stopped reading its comments. What's the correct style of instruction?",
+      options: [
+        "Vague instructions lead to over-flagging, false positives, and alert fatigue — developers stop trusting the tool. Provide explicit, measurable criteria: 'flag functions exceeding 50 lines, cyclomatic complexity above 10, or missing error handling on network calls.' Specific criteria produce consistent, actionable results that build trust.",
+        "Add 'but only flag high-confidence findings' so the model self-filters.",
+        "Prefix every output with a confidence score and threshold at 0.8.",
+        "Accept the false-positive rate as the cost of thorough review."
+      ],
+      answer: 0,
+      explain: "Vague instructions like 'be thorough' is a critical anti-pattern. Self-filtering by confidence relies on miscalibrated scores (another documented anti-pattern). Threshold scoring has the same calibration problem. Accepting noise erodes trust. Explicit measurable criteria are the fix. Domain 4 · Prompt Engineering."
+    },
+    {
+      q: "[Anti-pattern · HIGH] A stakeholder argues: 'Since tool_use with a JSON schema guarantees JSON compliance, we can skip downstream validation entirely.' What's the precise mistake in this reasoning?",
+      options: [
+        "tool_use guarantees STRUCTURE only — all required fields present, correct types, valid enum values. Values INSIDE the JSON may still be wrong (fabricated dates, wrong amounts, misattributed names). Validate extracted values after tool_use with business-rule checks; schema compliance + semantic validation together ensure both correct format AND correct content.",
+        "tool_use guarantees semantic correctness only when combined with temperature 0.",
+        "tool_use doesn't guarantee anything — it's just a hint that the model follows most of the time.",
+        "tool_use guarantees both structure and semantics; the stakeholder is correct."
+      ],
+      answer: 0,
+      explain: "Assuming tool_use guarantees semantic correctness is a high-priority anti-pattern. Temperature affects consistency of generation, not semantic correctness of values. tool_use isn't a hint — it genuinely enforces structure. And the stakeholder's claim collapses the crucial structure/semantics distinction. Domain 4 · Prompt Engineering."
+    },
+    {
+      q: "[Anti-pattern · HIGH] A validation-retry loop sends `'There were errors in your extraction. Please try again.'` back to the model on failures. The retry almost never succeeds. What should the retry payload contain?",
+      options: [
+        "Generic retry messages give the model no signal for what to fix — it's guessing. Append specific error details: which field failed, what was wrong, and expected vs actual (e.g., 'field invoice_date had value \"2024-13-45\" — expected an ISO 8601 date; line items sum to $450 but stated_total is $500').",
+        "Increase the retry count from 3 to 10 so the model eventually lands on a correct response.",
+        "Switch to a more capable model on retries only; the original model is insufficient.",
+        "Re-send the original prompt but at a higher temperature to diversify the output."
+      ],
+      answer: 0,
+      explain: "Generic retry messages is a high-priority anti-pattern. More retries with vague signal is just more guessing. Model capability isn't the issue when the signal is missing. Higher temperature diversifies output but doesn't target the specific failure. Concrete error details are the fix. Domain 4 · Prompt Engineering."
+    },
+
+    // ============ DOMAIN 5 — CONTEXT & RELIABILITY (3 anti-patterns) ============
+    {
+      q: "[Anti-pattern · CRITICAL] An agent handling long support conversations progressively summarizes older messages to save tokens. Over time, specific order numbers and refund amounts disappear into vague summaries. What's the correct pattern?",
+      options: [
+        "Progressive summarization of critical customer details loses specifics — names, IDs, amounts, dates. Use immutable 'case facts' blocks positioned at the START of context (a high-recall position); case facts are never summarized and contain structured transactional data that must survive the whole conversation.",
+        "Summarize more aggressively so less irrelevant context takes up space.",
+        "Keep the full conversation history and raise max_tokens to compensate.",
+        "Drop the oldest 25% of messages each time context fills up."
+      ],
+      answer: 0,
+      explain: "Progressive summarization of critical customer details is a critical anti-pattern. More aggressive summarization worsens it. max_tokens on input doesn't help the underlying attention decay. Dropping oldest messages loses the same details. Immutable structured 'case facts' at the beginning is the documented fix — it also exploits front-of-context recall (avoiding lost-in-the-middle). Domain 5 · Context & Reliability."
+    },
+    {
+      q: "[Anti-pattern · CRITICAL] A data extraction team proudly reports '95% overall accuracy' and moves to automate the pipeline. Stakeholders complain that invoices are error-riddled. How could the team have caught this earlier?",
+      options: [
+        "Aggregate accuracy metrics mask per-category failures — invoices at 70% and receipts at 99% can still average ~95%. Track accuracy per document type (stratified metrics); per-type tracking reveals hidden failures that aggregate metrics conceal.",
+        "Increase the sample size used to calculate aggregate accuracy.",
+        "Use a weighted accuracy metric that over-weights recently processed documents.",
+        "Report median accuracy instead of mean to reduce the impact of outliers."
+      ],
+      answer: 0,
+      explain: "Aggregate accuracy metrics only is a critical anti-pattern. Larger samples produce more precise aggregate numbers — they don't decompose by category. Weighting and median both still aggregate. Stratified per-type metrics is the documented fix. Domain 5 · Context & Reliability."
+    },
+    {
+      q: "[Anti-pattern · HIGH] In a multi-agent system, subagents A and B return conflicting revenue figures. The coordinator has no way to determine which to trust and arbitrarily picks one. What's missing, and what's the fix?",
+      options: [
+        "No provenance tracking. When subagents provide conflicting data there's no way to determine source reliability. Track source, confidence level, timestamp, and agent ID for all data; provenance metadata enables informed conflict resolution (trust the verified database over an extracted PDF, prefer newer data where freshness matters, audit the trail later).",
+        "Have the coordinator average the two values to produce a best estimate.",
+        "Always trust the subagent whose response came in first.",
+        "Escalate every conflict to a human for resolution."
+      ],
+      answer: 0,
+      explain: "No provenance tracking for multi-agent data is a high-priority anti-pattern. Averaging conflicting numbers is statistically unsound. First-in arrival order has no bearing on reliability. Always-escalating overwhelms humans when provenance would resolve most cases automatically. Tracking source/confidence/timestamp/agent ID is the fix. Domain 5 · Context & Reliability."
+    }
+  ]
+});
+
 // Export for app
 
 
@@ -4003,9 +4473,10 @@ SCENARIOS.push({
   function qKey(sid, qi) { return sid + ':' + qi; }
 
   // === Build test ===
-  // Scenarios 7 (Official Practice) and 8 (Docs Deep Dives) are dedicated review sets
-  // accessible only via their own buttons — they do NOT participate in random exam draws.
-  const SPECIAL_SCENARIO_IDS = new Set([7, 8]);
+  // Scenarios 7 (Official Practice), 8 (Docs Deep Dives), and 9 (Anti-Pattern Spotter)
+  // are dedicated review sets accessible only via their own buttons — they do NOT
+  // participate in random exam draws.
+  const SPECIAL_SCENARIO_IDS = new Set([7, 8, 9]);
 
   function buildTest() {
     const scenariosPerTest = 4;
@@ -4376,21 +4847,24 @@ SCENARIOS.push({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function startOfficialTest() { startSpecialTest(7, 'official set'); }
-  function startDocsTest()     { startSpecialTest(8, 'docs deep dives'); }
+  function startOfficialTest()     { startSpecialTest(7, 'official set'); }
+  function startDocsTest()          { startSpecialTest(8, 'docs deep dives'); }
+  function startAntiPatternsTest()  { startSpecialTest(9, 'anti-pattern spotter'); }
 
   function init() {
     // Populate landing stats — count only the 6 exam scenarios for the headline
     const examScenarios = SCENARIOS.filter(s => !SPECIAL_SCENARIO_IDS.has(s.id));
     const officialScenario = SCENARIOS.find(s => s.id === 7);
     const docsScenario = SCENARIOS.find(s => s.id === 8);
+    const apScenario = SCENARIOS.find(s => s.id === 9);
     const examQ = examScenarios.reduce((a, s) => a + s.questions.length, 0);
     const officialQ = officialScenario ? officialScenario.questions.length : 0;
     const docsQ = docsScenario ? docsScenario.questions.length : 0;
+    const apQ = apScenario ? apScenario.questions.length : 0;
 
     $('#s-scenarios').innerHTML = examScenarios.length + '<span class="unit">total</span>';
     $('#s-questions').innerHTML = examQ + '<span class="unit">items</span>';
-    $('#bank-total-q').textContent = examQ + ' scenario + ' + officialQ + ' official + ' + docsQ + ' docs';
+    $('#bank-total-q').textContent = examQ + ' scenario + ' + officialQ + ' official + ' + docsQ + ' docs + ' + apQ + ' anti-patterns';
 
     // Adjust special-set button labels to show counts
     const offBtn = $('#start-official-btn');
@@ -4411,10 +4885,20 @@ SCENARIOS.push({
         docsBtn.textContent = 'Docs Deep Dives (' + docsQ + ')';
       }
     }
+    const apBtn = $('#start-antipatterns-btn');
+    if (apBtn) {
+      if (apQ === 0) {
+        apBtn.disabled = true;
+        apBtn.textContent = 'Anti-Pattern Spotter (none loaded)';
+      } else {
+        apBtn.textContent = 'Anti-Pattern Spotter (' + apQ + ')';
+      }
+    }
 
     $('#start-btn').addEventListener('click', startNewTest);
     if (offBtn) offBtn.addEventListener('click', startOfficialTest);
     if (docsBtn) docsBtn.addEventListener('click', startDocsTest);
+    if (apBtn) apBtn.addEventListener('click', startAntiPatternsTest);
     $('#again-btn').addEventListener('click', startNewTest);
     $('#home-btn').addEventListener('click', function() {
       show('landing');
