@@ -1017,6 +1017,7 @@
         <button class="btn secondary" id="start-official-btn">Practice Official Questions</button>
         <button class="btn secondary" id="start-docs-btn">Docs Deep Dives</button>
         <button class="btn secondary" id="start-antipatterns-btn">Anti-Pattern Spotter</button>
+        <button class="btn secondary" id="start-skills-btn">Intro to Agent Skills</button>
         <button class="btn secondary" id="reset-btn">Reset Question Pool</button>
       </div>
       <p class="note" style="margin-top: 24px;">
@@ -1024,6 +1025,7 @@
         <strong style="font-style: normal; color: var(--paper);">Official Questions</strong> runs through the canonical community practice set (sourced from claudecertifications.com), grouped by domain.
         <strong style="font-style: normal; color: var(--paper);">Docs Deep Dives</strong> tests the same exam concepts at higher precision, synthesized from platform.claude.com documentation.
         <strong style="font-style: normal; color: var(--paper);">Anti-Pattern Spotter</strong> drills the 18 cheatsheet anti-patterns — one question per pattern to build instant recognition.
+        <strong style="font-style: normal; color: var(--paper);">Intro to Agent Skills</strong> covers the first of four Anthropic-suggested courses: SKILL.md contract, priority order, progressive disclosure, and Skills vs CLAUDE.md / Subagents / Hooks.
         Scroll up to review the <strong style="font-style: normal; color: var(--paper);">Anti-Patterns Cheatsheet</strong> for a quick-reference of all 18 patterns before starting a test.
         Explanations appear immediately after each answer. The question pool persists for this browser session only — no data is stored.
       </p>
@@ -1920,6 +1922,28 @@ SCENARIOS.push({
       ],
       answer: 0,
       explain: "Mode selection is the root cause — small changes belong in direct execution. Constraining plan mode fights its purpose. You can't 'delete' a built-in mode. It isn't a bug."
+    },
+    {
+      q: "Your team's engineering standards require \"never modify database schema directly — always go through the migration tool.\" This rule must be enforced in every Claude Code session across the repo, regardless of what the developer is working on. You're deciding between CLAUDE.md, a skill, and a slash command. Where does this rule belong?",
+      options: [
+        "The repo's `.claude/CLAUDE.md` — it's an always-on project-wide constraint and must load into every conversation. Skills load on demand via semantic match and may not trigger when a developer says \"run this migration\" without DB keywords, so a universal rule belongs in CLAUDE.md.",
+        "A skill `db-safety` with a vivid description — Claude's semantic matcher will pick up any DB-related request and load the constraint before acting.",
+        "A custom slash command `/db-check` that developers are expected to invoke before any schema change.",
+        "The user-level `~/.claude/CLAUDE.md` so every teammate gets the rule regardless of which repo they're in."
+      ],
+      answer: 0,
+      explain: "CLAUDE.md is designed for always-on project standards — it loads into every conversation automatically, which is what a universal enforcement rule requires. Skills are request-driven: Claude matches them to user phrasing, which is probabilistic and fails when DB intent isn't explicit in the prompt. Slash commands require developers to remember to invoke them — a non-starter for an enforcement rule. User-level CLAUDE.md makes the rule personal-scope only (teammates don't inherit it) and also applies the rule in unrelated repos. Domain 3 · Claude Code Config."
+    },
+    {
+      q: "You commit a new team skill at `.claude/skills/pr-review/SKILL.md` with description \"Does PR reviews.\" Teammates run prompts like \"review this PR\" and \"check the diff for issues,\" but Claude never activates the skill. You've verified the file path is correct and the filename is exactly `SKILL.md`. What's the fix?",
+      options: [
+        "Rewrite the description using the phrases teammates actually say — \"review this PR\", \"code review checklist\", \"check the diff\", \"review changes\". Claude semantically matches skills against the description, so vague phrasing like \"Does PR reviews\" has no overlap with real user prompts and fails to trigger.",
+        "Move the skill to `~/.claude/skills/pr-review/` so personal-scope priority overrides the project scope and the skill starts taking effect.",
+        "Rename the file to lowercase `skill.md` — uppercase `SKILL.md` was deprecated in a recent Claude Code release.",
+        "Add `allowed-tools: *` to the frontmatter — without explicit tool permissions, Claude refuses to load the skill body."
+      ],
+      answer: 0,
+      explain: "Skill loading (\"is the file discoverable?\") and skill triggering (\"did Claude activate it on this request?\") are different problems. When the file is at the right path with the right name, loading is fine and the problem is triggering — Claude uses semantic search against the description, so vague descriptions fail to match user prompts. The fix is always to rewrite the description with phrases users actually say. Personal scope has higher priority but doesn't fix description matching. SKILL.md is case-sensitive and hasn't been deprecated. `allowed-tools` controls permission prompts, not loading. Domain 3 · Claude Code Config."
     }
   ]
 });
@@ -2338,6 +2362,17 @@ SCENARIOS.push({
       ],
       answer: 0,
       explain: "Models reliably process information at the beginning and end of long inputs but may omit findings from middle sections — the 'lost in the middle' effect. Front-loading key summaries plus explicit section headers is the documented mitigation. Larger context windows don't change position sensitivity. Randomization just moves the problem around. Temperature doesn't affect attention position."
+    },
+    {
+      q: "Your report-generator subagent produces citations in inconsistent formats — sometimes APA, sometimes MLA, sometimes a hybrid. You've authored a skill `apa-citations` at `.claude/skills/apa-citations/SKILL.md` that defines the canonical format, but the subagent ignores it even when its output clearly needs citation formatting. What's required?",
+      options: [
+        "Add `skills: apa-citations` to the report-generator subagent's frontmatter and confirm the skill exists at the declared path. Custom subagents start with a fresh context and don't inherit the main conversation's skills — they must be declared explicitly, and the declared skills load when the subagent starts rather than on demand.",
+        "Reference the skill's instructions inside the coordinator's system prompt and pass them through the delegation message — subagents inherit skills indirectly via the delegation context.",
+        "Convert the subagent to use a built-in agent like Verify, which automatically inherits all skills available in the repo.",
+        "Move the skill to `~/.claude/skills/apa-citations/` so it applies to every subagent globally, regardless of project."
+      ],
+      answer: 0,
+      explain: "Custom subagents run in isolated contexts and don't inherit skills from the main conversation — skills must be explicitly listed in the subagent's frontmatter (`skills: <name>`) and the file must exist at the expected path. Unlike the main conversation where skills load on demand, listed skills for a subagent load when the subagent starts. Coordinator pass-through wastes context and is probabilistic. Built-in agents (Explore, Plan, Verify) CANNOT access skills at all — only custom subagents can. User-level scope doesn't change inheritance rules; explicit declaration is still required. Domain 1 · Agentic Architecture."
     }
   ]
 });
@@ -2745,6 +2780,17 @@ SCENARIOS.push({
       ],
       answer: 0,
       explain: "Targeted re-analysis preserves the investigation's accumulated context while refreshing exactly the parts that changed. Blind trust in prior analysis creates wrong-file bugs. Full restart loses valuable context. Full re-exploration wastes context budget on files that haven't changed."
+    },
+    {
+      q: "Your team wants prettier to run automatically on every file Claude writes or edits. The behavior must apply to every developer in every session — no opt-in, no \"please remember to run it.\" Which primitive is the right choice?",
+      options: [
+        "A PostToolUse hook wired to Write and Edit. Hooks are event-driven and fire deterministically on tool calls, which is exactly what \"every file write\" requires.",
+        "A skill named `auto-format` with a description like \"formats files after saving\" — Claude will activate it whenever it writes a file.",
+        "A custom slash command `/format` that each developer runs at the end of a session to batch-format all edited files.",
+        "An instruction in CLAUDE.md saying \"always run prettier after writing any file\" — Claude reads this in every conversation and applies it."
+      ],
+      answer: 0,
+      explain: "\"Every time Y happens\" is the signature of a hook use case. Hooks (PreToolUse, PostToolUse, Stop) fire deterministically on events — the right primitive for automatic side effects on tool calls. Skills are request-driven: they activate only when Claude matches a user request to the skill's description, which is not a reliable trigger for silent tool calls Claude makes on its own. A slash command shifts work back to the developer and misses writes between invocations. CLAUDE.md instructions are probabilistic — Claude may skip the prettier step on any given write. Domain 1 · Agentic Architecture."
     }
   ]
 });
@@ -3130,6 +3176,17 @@ SCENARIOS.push({
       ],
       answer: 0,
       explain: "Structured JSON is more reliable for tooling integration. Markdown doesn't have systematic syntax errors, cost, or code-block limitations that would matter here."
+    },
+    {
+      q: "Your CI pipeline uses Claude Code to run a 350-line coverage-gate validation script before approving a PR. The gate must be deterministic — identical inputs must produce identical outputs every run, because CI gates can't tolerate probabilistic results. You're designing the skill that owns this check. How should the skill reference the script?",
+      options: [
+        "Bundle the script at `scripts/validate-coverage.sh` inside the skill directory and instruct Claude to RUN it. The script executes as tested code with deterministic output, and only stdout/stderr enters context — the script body itself never consumes tokens.",
+        "Inline the full script logic inside SKILL.md so Claude can reason about each check and adapt the validation to novel coverage patterns it encounters.",
+        "Paste the script into the `description` field so Claude always has it available at the top of every conversation without needing a separate file read.",
+        "Tell Claude to READ the script first, understand its logic, then re-express the checks as native tool calls — this lets Claude optimize away redundant steps on the fly."
+      ],
+      answer: 0,
+      explain: "Bundled scripts are the correct primitive for operations that must be deterministic. They execute as tested code, produce identical output every run, and only their stdout/stderr consumes tokens — the source never enters context. Inlining or letting Claude \"reason about\" the logic introduces non-determinism: Claude may \"improve\" the script between runs, breaking the CI gate. The description field has a 1024-char limit and isn't designed to hold executable code. Read-then-reexpress is the anti-pattern — generated code is probabilistic, tested code is deterministic. Domain 5 · Context & Reliability."
     }
   ]
 });
@@ -4433,6 +4490,187 @@ SCENARIOS.push({
   ]
 });
 
+// ==========================================================================
+// SCENARIO 10: Intro to Agent Skills (Anthropic Course)
+// Questions synthesized from the "Introduction to Agent Skills" course —
+// one of the four courses Anthropic suggests for the certification.
+// Covers SKILL.md frontmatter, naming rules, priority order, progressive
+// disclosure, script bundling, and how skills compare to CLAUDE.md,
+// subagents, and hooks.
+// ==========================================================================
+SCENARIOS.push({
+  id: 10,
+  title: "Intro to Agent Skills",
+  context: "This section drills the \"Introduction to Agent Skills\" course content — one of the four Anthropic-suggested courses for the certification. Focus areas: SKILL.md frontmatter contract, name/directory rules, priority order across enterprise/user/project/plugin scopes, progressive disclosure, bundled scripts, and the distinctions between Skills, CLAUDE.md, Subagents, and Hooks.",
+  questions: [
+    {
+      q: "You're creating a skill at `.claude/skills/pr-review/SKILL.md`. Which frontmatter fields are strictly MANDATORY?",
+      options: [
+        "`name` and `description` only — everything else (`allowed-tools`, `model`, `color`, `context`, `license`, `metadata`) is optional.",
+        "`name`, `description`, and `allowed-tools` — without allowed-tools the skill has no permissions.",
+        "`name`, `description`, `model`, and `color` — the model field is required to route the skill correctly.",
+        "`name` only — `description` is strongly recommended but technically optional."
+      ],
+      answer: 0,
+      explain: "Only `name` and `description` are required. All other frontmatter fields (`allowed-tools`, `model`, `color`, `context`, `license`, `metadata`) are optional. `name` must match the directory, and `description` (max 1024 chars) is what Claude uses via semantic search to decide when to load the skill."
+    },
+    {
+      q: "A skill lives at `~/.claude/skills/pr-review/SKILL.md` but its frontmatter declares `name: code-review`. What happens?",
+      options: [
+        "Invalid — the `name` field MUST match the directory name. Rename one to match the other or the skill won't load.",
+        "Works fine — `name` is cosmetic metadata shown in `/skills` and doesn't need to match the directory.",
+        "Loads, but Claude uses the directory name `pr-review` and silently ignores the `name` field.",
+        "Works only for personal skills — project-level skills require a match, but user-level skills don't."
+      ],
+      answer: 0,
+      explain: "The `name` in SKILL.md must exactly equal the containing directory name. A skill at `pr-review/` must declare `name: pr-review`. Mismatches break loading entirely — this is a common troubleshooting cause when skills don't appear in `/skills`."
+    },
+    {
+      q: "Once a skill is installed, what does Claude actually see about it BEFORE the skill is invoked?",
+      options: [
+        "Only the `name` and `description` from the frontmatter. The body of SKILL.md loads on demand when Claude semantically matches a user request to the skill.",
+        "The full SKILL.md content is loaded into every conversation upfront, the same way CLAUDE.md loads.",
+        "Nothing — skills are invisible until the user explicitly types `/<skill-name>`.",
+        "Only the file path; Claude reads SKILL.md fresh every turn to decide if it's relevant."
+      ],
+      answer: 0,
+      explain: "Skills use progressive disclosure. Only the frontmatter (name + description) is in context upfront — that's what Claude uses to decide when to invoke the skill. The SKILL.md body, references, and scripts load only when Claude matches a request and activates the skill. This keeps context lean across many installed skills."
+    },
+    {
+      q: "Two skills named `deploy-check` are installed: one at `~/.claude/skills/deploy-check/` (personal) and one at `./.claude/skills/deploy-check/` (project). Which one wins?",
+      options: [
+        "Personal — the priority order is Enterprise > Personal/User > Project > Plugin. Personal shadows Project.",
+        "Project — project-scoped config always overrides user-scoped config in Claude Code.",
+        "Whichever was installed most recently.",
+        "Both load simultaneously and Claude picks one per request based on description similarity."
+      ],
+      answer: 0,
+      explain: "Priority (highest to lowest): Enterprise (managed-settings.json) > Personal (`~/.claude/skills/`) > Project (`./.claude/skills/`) > Plugin. Personal shadows Project when names collide. To avoid shadowing surprises, use distinct descriptive names like `frontend-pr-review` vs `backend-pr-review`."
+    },
+    {
+      q: "Which of the following is the ONLY valid skill name?",
+      options: [
+        "`frontend-pr-review` — lowercase letters and hyphens, starts with a letter, under 64 chars.",
+        "`PR-Review` — uppercase letters are permitted in skill names.",
+        "`-pr-review` — leading hyphens are acceptable.",
+        "`pr--review` — consecutive hyphens are allowed for readability."
+      ],
+      answer: 0,
+      explain: "Skill names must be lowercase letters, digits, and hyphens only; must start with a letter; and must be 1–64 characters. `PR-Review` fails (uppercase), `-pr-review` fails (leading hyphen), `pr--review` fails (double hyphen). Only `frontend-pr-review` satisfies every rule."
+    },
+    {
+      q: "Your skill declares `allowed-tools: Read, Grep, Glob, Bash(git:*)` in its frontmatter. What does this field actually do?",
+      options: [
+        "Pre-authorizes those tools so Claude won't prompt for permission when the skill uses them. Omitting the field means the normal permission model applies — it does NOT restrict tool use.",
+        "Restricts the skill to ONLY those tools and blocks every other tool, even tools the skill needs to finish its task.",
+        "Grants the skill access to tools the user has disabled at the CLI level.",
+        "Nothing functional — it's a documentation-only field parsed for display in `/skills`."
+      ],
+      answer: 0,
+      explain: "`allowed-tools` is a permissions shortcut: tools listed here skip the permission prompt. Omitting it falls back to the normal permission model — the skill can still use any tool, it just goes through the usual approval flow. Critically, the field is NOT a sandbox or allowlist that restricts tool choice."
+    },
+    {
+      q: "Your skill bundles a 400-line setup validation script in its directory. What's the efficient way to use it?",
+      options: [
+        "Instruct Claude to RUN the script — only the stdout/stderr output consumes tokens, keeping the script source entirely out of context.",
+        "Instruct Claude to READ the script first so it understands the validation logic, then execute it.",
+        "Inline the script body into SKILL.md so Claude can reason about each check.",
+        "Paste the script into the `description` field so Claude always has it available."
+      ],
+      answer: 0,
+      explain: "The whole point of bundled scripts is that they execute without their source entering context — only the output consumes tokens. Telling Claude to read the script first defeats the purpose and burns tokens on code Claude doesn't need to understand. Bundled scripts are ideal for env validation, data transforms, and operations more reliable as tested code than generated code."
+    },
+    {
+      q: "Your SKILL.md is approaching 800 lines because of a large architecture reference. What's the recommended fix?",
+      options: [
+        "Extract the reference into `references/architecture-guide.md` and link with a cue like \"Only load when user requests more detail\" so it's pulled in only when needed.",
+        "Leave it — 800 lines is fine because skills load on demand anyway.",
+        "Move the content into CLAUDE.md so it's always available in every conversation.",
+        "Delete the reference and rely on Claude's prior knowledge for the architecture details."
+      ],
+      answer: 0,
+      explain: "Best practice: keep SKILL.md under 500 lines. For larger content use progressive disclosure — put detail in `references/`, `assets/`, or `scripts/` subdirectories and link from SKILL.md with phrases like \"Only load when user requests more detail\". Linked files stay out of context until Claude explicitly needs them."
+    },
+    {
+      q: "You have a rule \"never modify the database schema directly\" that must apply to every conversation in this repo. Where should it live?",
+      options: [
+        "CLAUDE.md — it's an always-on project-wide constraint, not task-specific expertise that loads on demand.",
+        "A skill called `db-safety` — wrap the rule so it activates only when database work is detected.",
+        "A PostToolUse hook that blocks any schema-modifying SQL.",
+        "Both CLAUDE.md and a skill, so the rule is enforced redundantly."
+      ],
+      answer: 0,
+      explain: "CLAUDE.md is for always-on project standards, constraints, and style preferences — it loads into every conversation. Skills are for task-specific expertise that's only relevant sometimes. A universal constraint like \"never modify the database schema\" belongs in CLAUDE.md; putting it in a skill risks it not being loaded when it matters."
+    },
+    {
+      q: "What is the key contextual difference between a skill activating and a subagent being invoked?",
+      options: [
+        "A skill's instructions join the CURRENT conversation's context; a subagent runs in a SEPARATE context, receives a task, works independently, and returns only its result.",
+        "Skills are faster but less capable; subagents are slower but more thorough.",
+        "Skills can only read files; subagents have full write access.",
+        "Skills always trigger automatically; subagents always require manual invocation."
+      ],
+      answer: 0,
+      explain: "Skills enhance the current conversation by adding expertise to the ongoing context. Subagents are isolated — they run in a fresh context, complete the delegated task, and return only the result. Use subagents when you want isolation (e.g., to keep noisy search results out of the main context); use skills when you want the expertise to persist throughout the current conversation."
+    },
+    {
+      q: "You want a linter to run every time Claude writes a file. Which mechanism fits?",
+      options: [
+        "Hook — hooks are event-driven (e.g., PostToolUse on file writes) and fire reliably on every occurrence. Skills are request-driven and won't trigger deterministically on every save.",
+        "Skill — create a `lint-on-save` skill and reference it from CLAUDE.md so Claude remembers to run it.",
+        "Subagent — delegate every write to a linter subagent.",
+        "Nothing mechanical — just trust Claude to remember to lint after each save."
+      ],
+      answer: 0,
+      explain: "Hooks fire on events (PreToolUse, PostToolUse, Stop) — they're the right tool for \"do X every time Y happens\". Skills are request-driven: they activate when Claude matches a user request to the skill's description, which is not a reliable trigger for \"on every save\". Use hooks for automatic side effects; use skills for knowledge that informs reasoning."
+    },
+    {
+      q: "You defined a skill `accessibility-audit` and a custom subagent `frontend-reviewer`. What does it take for the subagent to use the skill?",
+      options: [
+        "List `skills: accessibility-audit` in the subagent's frontmatter AND ensure the skill exists at `.claude/skills/accessibility-audit/SKILL.md`. The skill loads when the subagent starts — not on demand.",
+        "Nothing — subagents automatically inherit every skill available to the main conversation.",
+        "Reference the skill name in CLAUDE.md so the subagent picks it up through project context.",
+        "Pass the skill name as a runtime argument each time you invoke the subagent."
+      ],
+      answer: 0,
+      explain: "Subagents start fresh and don't inherit main-conversation skills. Custom subagents must explicitly declare needed skills in their frontmatter (`skills: skill-name`), and the named skill must exist at the expected path. Important caveat: built-in agents like Explore, Plan, and Verify CANNOT access skills at all — only custom subagents can, and only via explicit declaration."
+    },
+    {
+      q: "You wrote a performance profiling skill but Claude never invokes it when you ask \"why is this slow?\" or \"help me profile this\". What's most likely wrong, and how do you fix it?",
+      options: [
+        "The description is missing phrases users actually say. Add trigger keywords like \"profile\", \"slow\", \"performance\", \"faster\" to the description so semantic matching picks it up.",
+        "The SKILL.md body is too long — Claude skips skills over 500 lines.",
+        "Skills can only be triggered by imperative commands, not questions — rephrase your prompts.",
+        "User-scoped skills can't match natural-language queries; move it to project scope to enable matching."
+      ],
+      answer: 0,
+      explain: "Claude matches skills to requests via semantic search against the description. If the description doesn't reflect how users actually phrase requests (\"why is this slow\", \"make this faster\", \"help me profile\"), matching fails. The diagnostic fix is to add trigger phrases and user-style keywords to the description — test with variations and add whichever fail to trigger."
+    },
+    {
+      q: "Asking \"what skills are available?\" doesn't list your new skill. What should you check FIRST?",
+      options: [
+        "Structure: confirm the path is `<scope>/.claude/skills/<skill-name>/SKILL.md` (SKILL.md inside a named subdirectory, never at the skills root), the directory name matches `name:` in frontmatter, the file is named exactly `SKILL.md`, YAML is valid — and run `claude --debug` to surface loader errors.",
+        "Description: rewrite it to be more distinct from other skills' descriptions.",
+        "Permissions: add `allowed-tools: *` so the skill has permission to be loaded.",
+        "Reboot the machine — skills only reload on a full system restart."
+      ],
+      answer: 0,
+      explain: "\"Not listed\" is a loading problem, not a triggering problem. SKILL.md must live inside a named skill directory (never at the skills root), the filename must be exactly `SKILL.md`, the directory name must match `name:`, and YAML must be valid. `claude --debug` surfaces the actual loader error. Rewriting descriptions addresses TRIGGERING, not LOADING."
+    },
+    {
+      q: "A plugin skill isn't appearing even though the plugin is installed. What's the recommended fix sequence?",
+      options: [
+        "Clear the plugin cache (`rm ./.claude/plugins/cache`), restart Claude Code, then reinstall the plugin.",
+        "Delete the plugin's skill directory and manually copy the SKILL.md to `~/.claude/skills/`.",
+        "Edit `managed-settings.json` to raise the plugin's priority above user-scope.",
+        "Wait — plugin skills are lazy-loaded and can take several minutes to register."
+      ],
+      answer: 0,
+      explain: "Stale plugin cache is a known cause of missing plugin skills. Fix: remove the cache directory at `./.claude/plugins/cache`, restart Claude Code, then reinstall the plugin. Note: to REMOVE any skill entirely (not just refresh), delete its directory and restart — skills don't hot-unload while Claude Code is running."
+    }
+  ]
+});
+
 // Export for app
 
 
@@ -4476,7 +4714,7 @@ SCENARIOS.push({
   // Scenarios 7 (Official Practice), 8 (Docs Deep Dives), and 9 (Anti-Pattern Spotter)
   // are dedicated review sets accessible only via their own buttons — they do NOT
   // participate in random exam draws.
-  const SPECIAL_SCENARIO_IDS = new Set([7, 8, 9]);
+  const SPECIAL_SCENARIO_IDS = new Set([7, 8, 9, 10]);
 
   function buildTest() {
     const scenariosPerTest = 4;
@@ -4850,6 +5088,7 @@ SCENARIOS.push({
   function startOfficialTest()     { startSpecialTest(7, 'official set'); }
   function startDocsTest()          { startSpecialTest(8, 'docs deep dives'); }
   function startAntiPatternsTest()  { startSpecialTest(9, 'anti-pattern spotter'); }
+  function startSkillsTest()        { startSpecialTest(10, 'intro to agent skills'); }
 
   function init() {
     // Populate landing stats — count only the 6 exam scenarios for the headline
@@ -4857,14 +5096,16 @@ SCENARIOS.push({
     const officialScenario = SCENARIOS.find(s => s.id === 7);
     const docsScenario = SCENARIOS.find(s => s.id === 8);
     const apScenario = SCENARIOS.find(s => s.id === 9);
+    const skillsScenario = SCENARIOS.find(s => s.id === 10);
     const examQ = examScenarios.reduce((a, s) => a + s.questions.length, 0);
     const officialQ = officialScenario ? officialScenario.questions.length : 0;
     const docsQ = docsScenario ? docsScenario.questions.length : 0;
     const apQ = apScenario ? apScenario.questions.length : 0;
+    const skillsQ = skillsScenario ? skillsScenario.questions.length : 0;
 
     $('#s-scenarios').innerHTML = examScenarios.length + '<span class="unit">total</span>';
     $('#s-questions').innerHTML = examQ + '<span class="unit">items</span>';
-    $('#bank-total-q').textContent = examQ + ' scenario + ' + officialQ + ' official + ' + docsQ + ' docs + ' + apQ + ' anti-patterns';
+    $('#bank-total-q').textContent = examQ + ' scenario + ' + officialQ + ' official + ' + docsQ + ' docs + ' + apQ + ' anti-patterns + ' + skillsQ + ' skills';
 
     // Adjust special-set button labels to show counts
     const offBtn = $('#start-official-btn');
@@ -4894,11 +5135,21 @@ SCENARIOS.push({
         apBtn.textContent = 'Anti-Pattern Spotter (' + apQ + ')';
       }
     }
+    const skillsBtn = $('#start-skills-btn');
+    if (skillsBtn) {
+      if (skillsQ === 0) {
+        skillsBtn.disabled = true;
+        skillsBtn.textContent = 'Intro to Agent Skills (none loaded)';
+      } else {
+        skillsBtn.textContent = 'Intro to Agent Skills (' + skillsQ + ')';
+      }
+    }
 
     $('#start-btn').addEventListener('click', startNewTest);
     if (offBtn) offBtn.addEventListener('click', startOfficialTest);
     if (docsBtn) docsBtn.addEventListener('click', startDocsTest);
     if (apBtn) apBtn.addEventListener('click', startAntiPatternsTest);
+    if (skillsBtn) skillsBtn.addEventListener('click', startSkillsTest);
     $('#again-btn').addEventListener('click', startNewTest);
     $('#home-btn').addEventListener('click', function() {
       show('landing');
